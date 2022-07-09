@@ -1,0 +1,149 @@
+<?php include("includes/header.php"); ?>
+
+<?php
+
+$reported_comments = reportedComment::all_reported_comment();
+
+//print_r($reported_comments);
+
+?>
+
+<?php 
+
+if(isset($_GET['delete'])) {
+
+$reportedComment = reportedComment::find_by_id($_GET['delete']);
+
+$reportedComment->delete();
+$session->message("The Comment with {$comment->id} id has been deleted");
+redirect("reported_comments.php");
+
+}
+
+?>
+
+<?php 
+
+if(isset($_GET['approve'])) {
+
+$comment = Comment::find_by_id($_GET['approve']);
+
+$comment->status = "Approved";
+$comment->save();
+$session->message("The Comment has been approved");
+redirect("reported_comments.php");
+
+
+}
+
+if(isset($_GET['unapprove'])) {
+
+$comment = Comment::find_by_id($_GET['unapprove']);
+
+$comment->status = "Unapproved";
+$comment->save();
+$session->message("The Comment has been unapproved");
+redirect("reported_comments.php");
+
+
+}
+
+
+
+
+?>
+
+
+
+
+
+
+
+
+
+<!-- Navigation -->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+
+<?php include("includes/top_nav.php"); ?>
+<?php include("includes/side_nav.php"); ?>
+   
+</nav>
+
+       
+       
+
+  
+<div id="page-wrapper">
+
+<div class="container-fluid">
+<div class="row">
+<div class="col-lg-12">
+
+<h1 class="page-header">Reported Comments</h1>
+
+<p class="bg-success"><?php echo $message; ?></p>
+
+
+<div class="col-md-12">
+  
+<table class="table table-bordered table-hover" >
+
+<thead>
+<tr>
+  
+<th>Id</th>
+<th>Author</th>
+<th>Comment</th>
+<th>Post</th>
+<th>Reports</th>
+<th>Status</th>
+<th>Date</th>
+<th>Approve</th>
+<th>Unapprove</th>
+<th>Delete</th>
+
+</tr>
+</thead>
+
+<tbody>
+
+<?php foreach($reported_comments as $reported_comment) : ?> 
+
+<?php $user         = User::find_by_id($reported_comment->user_id); ?>    
+<?php $reportCounts = reportedComment::count_of_reports($reported_comment->comment_id); ?>
+<?php $comment      = Comment::find_by_id($reported_comment->comment_id); ?> 
+
+<tr>
+
+<td><?php echo $reported_comment->id; ?></td>
+<td><?php if(isset($user->username)) { echo $user->username; } ?></td>
+
+<td> <?php if(isset($comment->body)) { echo $comment->body; } ?> </td>
+<td> <a target="_blank" href="../post.php?id=<?php echo $reported_comment->post_id; ?>" >View</a> </td>
+<td> <?php echo count($reportCounts) ?> </td>
+<td <?php if(isset($comment->status) && ($comment->status == "Approved" )) { echo "style=color:green;>"; } else { echo "style=color:red;>"; } ?>
+<?php if(isset($comment->status)) { echo $comment->status; } ?> </td>
+<td> <?php if(isset($comment->date)) { echo $comment->date; } ?></td>
+<td><a href="reported_comments.php?approve=<?php echo $comment->id; ?>">Approve</a></td>
+<td><a href="reported_comments.php?unapprove=<?php echo $comment->id; ?>">Unapprove</a></td>
+<td><a href="reported_comments.php?delete=<?php echo $reported_comment->id ?>" >Delete</a></td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+</div>
+</div>
+</div>
+
+</div>
+
+
+<?php include("includes/footer.php"); ?>
